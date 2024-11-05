@@ -16,6 +16,16 @@ To compile ``make``. The program can be checked with the sample inputs provdide.
 To run do ``./bss input.txt``. Running without any filename expects the input in
 STDIN.
 
+# Input format
+
+The input can be specified using a file or directly copy pasting to the STDIN.
+The sepcific format is mentioned in the file ``Tut 8.pdf``. A sample run is
+shown below:
+
+ Input             |  Output
+:-----------------:|:-------------------------:
+![](input.png)     |  ![](output.png)
+
 # TODO
 
 Error handling.
