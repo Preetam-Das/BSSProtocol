@@ -1,4 +1,5 @@
 // TODO : Error Handling
+// TODO : Update EV_SENT logic :DONE
 
 #include <fstream>
 #include <ostream>
@@ -160,14 +161,17 @@ void simulate2() {
 
     curr_site = 0;
     ev_pending = ev_list;
-    struct st_event prev_ev;
+    bool recv_A_processed;
 
     while(!ev_pending.empty()) {
         for (auto ev_it = begin(ev_pending); ev_it != end(ev_pending);) {
 
             // & is very important
             struct st_event &ev = *ev_it;
-            curr_site = ev.associated_site_id;
+            if (ev.associated_site_id != curr_site) {
+                curr_site = ev.associated_site_id;
+                recv_A_processed = true;
+            }
 
             switch (ev.ev_type) {
                 case EV_RECVB:
@@ -178,26 +182,26 @@ void simulate2() {
                     break;
                 case EV_RECVA:
                     // check if can be processed
+                    // once recv_A_processed is false 
+                    // don't make it true
+                    if (recv_A_processed) {
+                        recv_A_processed = is_deliverable(ev);
+                    }
                     if (is_deliverable(ev)) {
                         timestamp(ev);
-                        // // store for future use
-                        prev_ev = *ev_it;
                         // remove from pending
                         ev_it = ev_pending.erase(ev_it);
                     }
                     else {
-                        // // store for future use
-                        prev_ev = *ev_it;
                         ev_it++;
                     }
                     break;
                 case EV_SENT:
-                    // if not the first event of the site
-                    // if previous ev was RECV_A and not processed
+                    // if not the first event of the site and
+                    // if any previous RECV_A of the same site
+                    // is not processed
                     if ((!ev_processed[curr_site].empty()) &&
-                        (prev_ev.ev_type == EV_RECVA) &&
-                        (prev_ev.associated_site_id == ev.associated_site_id) &&
-                        !(prev_ev.processed)) {
+                        !(recv_A_processed)) {
                             // skip to next site
                             // if at end then go back
                             if (next(ev_it) == ev_pending.end()) {
