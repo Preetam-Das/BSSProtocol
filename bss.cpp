@@ -15,6 +15,14 @@ using namespace std;
 
 #define MAXSITES 9
 
+int NSITES;
+list<struct st_event> ev_list;
+list<struct st_event> ev_pending;
+map<pair<int, string>, struct st_event> sent_tracker;
+vector<list<struct st_event>> ev_processed;
+int curr_site;
+vector<vector<int>> vc_clock;
+
 enum en_event {
     EV_SENT,
     EV_RECVB,
@@ -82,14 +90,6 @@ st_event new_event(en_event ev_type, string msg, int associated_site_id, int ori
     return tempevent;
 }
 
-int NSITES;
-list<struct st_event> ev_list;
-list<struct st_event> ev_pending;
-map<pair<int, string>, struct st_event> sent_tracker;
-vector<list<struct st_event>> ev_processed;
-int curr_site;
-vector<vector<int>> vc_clock;
-
 void initialize(int nsites) {
     ev_processed.resize(nsites);
     vc_clock.resize(NSITES, vector<int> (NSITES,0));
@@ -125,6 +125,7 @@ bool is_deliverable(struct st_event &ev) {
 }
 
 void timestamp(struct st_event &ev) {
+
     switch (ev.ev_type) {
         case EV_RECVB:
             ev.vc = vc_clock[curr_site];
@@ -226,6 +227,7 @@ void simulate2() {
 }
 
 void generate_output() {
+
     for (int i = 0; i < NSITES; i++) {
         cout << "begin process p" + to_string(i+1) << endl;
         for (auto ev : ev_processed[i]) {
